@@ -1,1 +1,266 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aroma Natural Soap - ร้านสบู่ธรรมชาติ & ระบบจัดการคลังสินค้า</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area { position: absolute; left: 0; top: 0; width: 100%; border: 2px solid #000; padding: 20px; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans">
 
+  <!-- Navbar -->
+  <nav class="bg-emerald-800 text-white p-4 shadow-md sticky top-0 z-10">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-wide">🌿 AROMA NATURAL SOAP</h1>
+      <div class="space-x-2">
+        <button onclick="switchTab('store')" id="btn-store" class="bg-emerald-600 px-4 py-2 rounded-lg font-medium hover:bg-emerald-500">หน้าร้านสั่งซื้อ</button>
+        <button onclick="switchTab('wms')" id="btn-wms" class="bg-stone-700 px-4 py-2 rounded-lg font-medium hover:bg-stone-600">ระบบหลังบ้าน (หยิบ/แพ็ค/จ่าหน้า)</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- SECTION 1: หน้าร้านขายสบู่ (Landing Page) -->
+  <div id="tab-store" class="max-w-5xl mx-auto p-6">
+    <div class="text-center my-8">
+      <h2 class="text-3xl font-bold text-emerald-900">สบู่สมุนไพรธรรมชาติแท้ 100%</h2>
+      <p class="text-stone-600 mt-2">อ่อนโยนต่อผิว สกัดจากธรรมชาติ พร้อมจัดส่งตรงถึงหน้าบ้านคุณ</p>
+    </div>
+
+    <!-- รายการสินค้า 2 SKUs (ดึงรูปจากโฟลเดอร์ images/ ใน GitHub) -->
+    <div class="grid md:grid-cols-2 gap-8 mb-10">
+      <!-- SKU 01 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden p-6 flex flex-col justify-between">
+        <div>
+          <img src="./images/soap1.jpg" alt="สบู่น้ำผึ้งขมิ้นชัน" onerror="this.src='https://placehold.co/400x300/e2e8f0/1e293b?text=SKU-001+Honey+Turmeric'" class="w-full h-56 object-cover rounded-xl mb-4">
+          <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded">SKU-001</span>
+          <h3 class="text-xl font-bold mt-2">สบู่น้ำผึ้งขมิ้นชัน (Honey & Turmeric)</h3>
+          <p class="text-stone-500 text-sm mt-1">ช่วยลดสิว ลดการอักเสบของผิว เผยผิวกระจ่างใสอย่างเป็นธรรมชาติ ขนาด 100g</p>
+        </div>
+        <div class="mt-6 flex items-center justify-between border-t pt-4">
+          <span class="text-2xl font-bold text-emerald-700">฿120</span>
+          <div class="flex items-center space-x-2">
+            <label class="text-sm font-medium">จำนวน:</label>
+            <input type="number" id="qty-sku1" value="1" min="0" class="w-20 border rounded-lg p-2 text-center" onchange="calcTotal()">
+          </div>
+        </div>
+      </div>
+
+      <!-- SKU 02 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden p-6 flex flex-col justify-between">
+        <div>
+          <img src="./images/soap2.jpg" alt="สบู่ชาเขียวมินต์" onerror="this.src='https://placehold.co/400x300/dcfce7/14532d?text=SKU-002+Green+Tea+Mint'" class="w-full h-56 object-cover rounded-xl mb-4">
+          <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">SKU-002</span>
+          <h3 class="text-xl font-bold mt-2">สบู่ชาเขียวมินต์ (Green Tea & Mint)</h3>
+          <p class="text-stone-500 text-sm mt-1">ทำความสะอาดล้ำลึก คุมความมัน ให้ความรู้สึกเย็นสดชื่นผ่อนคลาย ขนาด 100g</p>
+        </div>
+        <div class="mt-6 flex items-center justify-between border-t pt-4">
+          <span class="text-2xl font-bold text-emerald-700">฿150</span>
+          <div class="flex items-center space-x-2">
+            <label class="text-sm font-medium">จำนวน:</label>
+            <input type="number" id="qty-sku2" value="0" min="0" class="w-20 border rounded-lg p-2 text-center" onchange="calcTotal()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ฟอร์มกรอกข้อมูลสั่งซื้อ -->
+    <div class="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 max-w-2xl mx-auto">
+      <h3 class="text-xl font-bold mb-4 border-b pb-2">ข้อมูลจัดส่งสินค้า</h3>
+      <form id="order-form" onsubmit="submitOrder(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">ชื่อ-นามสกุล ผู้รับ *</label>
+          <input type="text" id="cust-name" required placeholder="เช่น นายสมชาย ใจดี" class="w-full border rounded-lg p-2.5">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">เบอร์โทรศัพท์ *</label>
+          <input type="tel" id="cust-phone" required placeholder="เช่น 081-234-5678" class="w-full border rounded-lg p-2.5">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">ที่อยู่จัดส่ง (พร้อมรหัสไปรษณีย์) *</label>
+          <textarea id="cust-address" required rows="3" placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์" class="w-full border rounded-lg p-2.5"></textarea>
+        </div>
+        <div class="bg-stone-100 p-4 rounded-xl flex justify-between items-center">
+          <span class="font-medium">ยอดชำระรวมทั้งหมด:</span>
+          <span id="total-price" class="text-2xl font-bold text-emerald-700">฿120</span>
+        </div>
+        <button type="submit" id="btn-submit" class="w-full bg-emerald-700 text-white font-bold py-3 rounded-xl hover:bg-emerald-800 transition">ยืนยันการสั่งซื้อ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SECTION 2: ระบบหลังบ้าน (หยิบสินค้า + แพ็คสินค้า + จ่าหน้าพัสดุ) -->
+  <div id="tab-wms" class="max-w-5xl mx-auto p-6 hidden">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-stone-800">ระบบจัดการคลังสินค้าและจัดส่ง (Fulfillment)</h2>
+        <p class="text-stone-500 text-sm">ดึงข้อมูลจาก Google Sheets เพื่อทำการหยิบ (Pick) แพ็ค (Pack) และพิมพ์ใบจ่าหน้าพัสดุ</p>
+      </div>
+      <button onclick="loadOrders()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">🔄 รีเฟรชข้อมูล</button>
+    </div>
+
+    <div id="orders-container" class="space-y-4">
+      <p class="text-center text-stone-500 py-10">กำลังโหลดข้อมูลออเดอร์จาก Google Sheets...</p>
+    </div>
+  </div>
+
+  <!-- MODAL พิมพ์ใบจ่าหน้าพัสดุ -->
+  <div id="label-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl max-w-lg w-full p-6">
+      <div id="print-area" class="border-2 border-black p-6 bg-white">
+        <div class="flex justify-between border-b-2 border-black pb-3 mb-4">
+          <div>
+            <h3 class="font-bold text-lg">ใบจ่าหน้าพัสดุ (SHIPPING LABEL)</h3>
+            <p class="text-xs">รหัสออเดอร์: <span id="lbl-id" class="font-bold"></span></p>
+          </div>
+          <div class="text-right text-xs">
+            <p class="font-bold">ผู้ส่ง (FROM):</p>
+            <p>ร้าน AROMA NATURAL SOAP</p>
+            <p>กทม. 10900 โทร. 02-999-9999</p>
+          </div>
+        </div>
+        <div class="mb-4">
+          <p class="text-sm font-bold underline mb-1">ผู้รับ (TO):</p>
+          <p id="lbl-name" class="text-lg font-bold"></p>
+          <p id="lbl-phone" class="text-md font-semibold"></p>
+          <p id="lbl-address" class="text-md mt-1"></p>
+        </div>
+        <div class="border-t border-dashed border-black pt-3 text-xs">
+          <p class="font-bold mb-1">รายการสินค้าในกล่อง (Packing List):</p>
+          <p id="lbl-items"></p>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end space-x-2 no-print">
+        <button onclick="closeModal()" class="px-4 py-2 bg-stone-200 rounded-lg">ปิดหน้าต่าง</button>
+        <button onclick="window.print()" class="px-4 py-2 bg-emerald-700 text-white font-bold rounded-lg">🖨️ สั่งพิมพ์ใบจ่าหน้า</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydz_xlDDStXQDk_AwVz3AnyJBzQTdtGmOR_VmqYj6RDKYTS_KpCCcB3aA24MfcotrI/exec';
+
+    function switchTab(tab) {
+      document.getElementById('tab-store').classList.toggle('hidden', tab !== 'store');
+      document.getElementById('tab-wms').classList.toggle('hidden', tab !== 'wms');
+      if (tab === 'wms') loadOrders();
+    }
+
+    function calcTotal() {
+      const q1 = parseInt(document.getElementById('qty-sku1').value) || 0;
+      const q2 = parseInt(document.getElementById('qty-sku2').value) || 0;
+      const total = (q1 * 120) + (q2 * 150);
+      document.getElementById('total-price').innerText = '฿' + total.toLocaleString();
+      return total;
+    }
+
+    async function submitOrder(e) {
+      e.preventDefault();
+      const q1 = parseInt(document.getElementById('qty-sku1').value) || 0;
+      const q2 = parseInt(document.getElementById('qty-sku2').value) || 0;
+      if (q1 + q2 === 0) return alert('กรุณาเลือกสินค้าอย่างน้อย 1 ชิ้น');
+
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.innerText = 'กำลังบันทึกข้อมูลลง Google Sheets...';
+
+      const payload = {
+        action: 'create',
+        name: document.getElementById('cust-name').value,
+        phone: document.getElementById('cust-phone').value,
+        address: document.getElementById('cust-address').value,
+        sku1: q1,
+        sku2: q2,
+        total: calcTotal()
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(payload)
+        });
+        alert('สั่งซื้อสำเร็จ! ข้อมูลถูกบันทึกลง Google Sheets เรียบร้อยแล้ว');
+        document.getElementById('order-form').reset();
+        document.getElementById('qty-sku1').value = 1;
+        calcTotal();
+      } catch (err) {
+        alert('เกิดข้อผิดพลาด: ' + err);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'ยืนยันการสั่งซื้อ';
+      }
+    }
+
+    async function loadOrders() {
+      const container = document.getElementById('orders-container');
+      container.innerHTML = '<p class="text-center py-8">กำลังดึงข้อมูลจาก Google Sheets...</p>';
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const orders = await res.json();
+        if (orders.length === 0) {
+          container.innerHTML = '<p class="text-center py-8 text-stone-500">ยังไม่มีรายการสั่งซื้อ</p>';
+          return;
+        }
+        container.innerHTML = orders.reverse().map(o => `
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-lg text-emerald-800">${o.OrderID}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${o.Status === 'แพ็คแล้วพร้อมส่ง' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${o.Status}</span>
+                <span class="text-xs text-stone-400">${o.Timestamp}</span>
+              </div>
+              <p class="font-semibold mt-1">ลูกค้า: ${o.CustomerName} (${o.Phone})</p>
+              <p class="text-sm text-stone-600">ที่อยู่: ${o.Address}</p>
+              <div class="mt-2 bg-stone-100 p-2 rounded text-sm">
+                <strong>รายการหยิบสินค้า (Picking):</strong> 
+                ${o.SKU1_Qty > 0 ? `• สบู่น้ำผึ้งขมิ้นชัน (SKU-001) x <b>${o.SKU1_Qty}</b> ก้อน ` : ''}
+                ${o.SKU2_Qty > 0 ? `• สบู่ชาเขียวมินต์ (SKU-002) x <b>${o.SKU2_Qty}</b> ก้อน` : ''}
+              </div>
+            </div>
+            <div class="flex flex-col space-y-2 w-full md:w-auto">
+              <button onclick="markPacked('${o.OrderID}')" class="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700">✅ ยืนยันหยิบ & แพ็คสินค้า</button>
+              <button onclick='openLabel(${JSON.stringify(o)})' class="bg-stone-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-stone-900">📦 พิมพ์ใบจ่าหน้าพัสดุ</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = '<p class="text-center text-red-500 py-8">ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบ SCRIPT_URL</p>';
+      }
+    }
+
+    async function markPacked(orderId) {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ action: 'updateStatus', orderId: orderId, status: 'แพ็คแล้วพร้อมส่ง' })
+      });
+      alert('อัปเดตสถานะเป็น "แพ็คแล้วพร้อมส่ง" ใน Google Sheets เรียบร้อย');
+      loadOrders();
+    }
+
+    function openLabel(order) {
+      document.getElementById('lbl-id').innerText = order.OrderID;
+      document.getElementById('lbl-name').innerText = order.CustomerName;
+      document.getElementById('lbl-phone').innerText = 'โทร: ' + order.Phone;
+      document.getElementById('lbl-address').innerText = order.Address;
+      let items = [];
+      if (order.SKU1_Qty > 0) items.push(`SKU-001 สบู่น้ำผึ้งขมิ้นชัน (${order.SKU1_Qty} ชิ้น)`);
+      if (order.SKU2_Qty > 0) items.push(`SKU-002 สบู่ชาเขียวมินต์ (${order.SKU2_Qty} ชิ้น)`);
+      document.getElementById('lbl-items').innerText = items.join(' | ');
+      document.getElementById('label-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('label-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
